@@ -11,7 +11,7 @@ BG = pygame.transform.scale(pygame.image.load("space bg.jpg"), (WIDTH, HEIGHT))
 
 # -----------player properties-------------------
 PLAYER_WIDTH, PLAYER_HEIGHT = 30, 40
-PLAYER_VELOCITY = 4
+PLAYER_VELOCITY = 6
 
 # ------------star properties-------------------
 STAR_WIDTH = 10
@@ -41,7 +41,7 @@ def draw(player, elapsed_time,stars):
 #-----------main function---------------------
 
 def main():
-    run = True
+    run = False
     # -----------player properties-------------------
     player = pygame.Rect( 200,HEIGHT - PLAYER_HEIGHT - 10, PLAYER_WIDTH, PLAYER_HEIGHT)
 
@@ -58,7 +58,9 @@ def main():
     stars = []
     Hit = False
 
-    while run:
+    keys = pygame.key.get_pressed()
+
+    while not run:
         # ------Update the star count based on the time elapsed since the last frame-----
 
         star_count += clock.tick(60)
@@ -95,7 +97,7 @@ def main():
             player.x -= PLAYER_VELOCITY 
 
         #-----Move the player right -----
-        if keys[pygame.K_RIGHT] and player.x + PLAYER_VELOCITY + player.width <= WIDTH: 
+        if keys[pygame.K_RIGHT ] and player.x + PLAYER_VELOCITY + player.width <= WIDTH: 
             player.x += PLAYER_VELOCITY
         if keys[pygame.K_d] and player.x + PLAYER_VELOCITY + player.width <= WIDTH: 
             player.x += PLAYER_VELOCITY
@@ -127,14 +129,30 @@ def main():
 
         # ----- Draw everything on the screen after collision-----
 
+        # ----- Handle Game Over State -----
         if Hit:
             lost_text = FONT.render(f"You lost! Time survived: {round(elapsed_time)}s", 1, (255, 255, 255))
+            retry_text = FONT.render("Press R to retry or Q to quit", 1, (255, 255, 255))
             WIN.blit(lost_text, (WIDTH/2 - lost_text.get_width()/2, HEIGHT/2 - lost_text.get_height()/2))
+            WIN.blit(retry_text, (WIDTH/2 - retry_text.get_width()/2, HEIGHT/2 + retry_text.get_height()))
             pygame.display.update()
-            pygame.time.delay(5000)
-            break
-        draw(player, elapsed_time, stars)
-    pygame.quit()
 
+            # Wait for user input (Restart or Quit)
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            main()   # Restart the game loop fresh
+                            return
+                        if event.key == pygame.K_q:
+                            pygame.quit()
+                            return
+
+        draw(player, elapsed_time, stars)
+            
 if __name__ == "__main__":
     main()
