@@ -1,6 +1,7 @@
 import os
 
 import pygame
+pygame.mixer.init()
 import random
 import time
 
@@ -19,11 +20,21 @@ ORANGE_SPACESHIP_SIZE = pygame.transform.scale(ORANGE_SPACESHIP, (SPACSHIP_WIDTH
 # -----------player properties-------------------
 PLAYER_WIDTH, PLAYER_HEIGHT = 30, 40
 PLAYER_VELOCITY = 6
+ORANGE_HIT = pygame.USEREVENT + 2
 
 # ------------star properties-------------------
 STAR_WIDTH = 10
 STAR_HEIGHT = 20
 STAR_VELOCITY = 3
+STAR_HIT = pygame.USEREVENT + 1
+
+
+#-------------bullet propeties -------------------
+BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join('Grenade.mp3'))
+BULLET_SOUND = pygame.mixer.Sound(os.path.join('GunSilencer.mp3'))
+
+BULLET_VELOCITY =5
+MAX_BULLET = 3
 
 # ------------font properties-------------------
 pygame.font.init()
@@ -31,7 +42,7 @@ FONT = pygame.font.SysFont("comicsans", 30)
 
 # -----------draw function---------------------
 
-def draw(player, elapsed_time,stars):
+def draw(player, elapsed_time,stars,orange_bullets):
     WIN.blit(BG, (0, 0))
 
     # pygame.draw.rect(WIN, (255, 0, 0), player)
@@ -44,8 +55,19 @@ def draw(player, elapsed_time,stars):
     for star in stars:
         pygame.draw.rect(WIN, (255, 255, 0), star)
 
+    for bullet in orange_bullets :
+        pygame.draw.rect(WIN,(255,0, 0),bullet)
     #Update the display after drawing everything
     pygame.display.update()   
+
+def handle_bullets( orange_bullets, black, orange):
+    for bullet in orange_bullets:
+        bullet.x += BULLET_VELOCITY 
+        if black.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(STAR_HIT))
+            orange_bullets.remove(bullet)
+        elif bullet.x < 0:
+            orange_bullets.remove(bullet)
 
 #-----------main function---------------------
 
@@ -53,6 +75,8 @@ def main():
     run = False
     # -----------player properties-------------------
     player = pygame.Rect(600, 300, SPACSHIP_WIDTH, SPACESHIP_HEIGHT)
+
+    orange_bullets = []
 
     # ------------time properties---------------------
     clock = pygame.time.Clock()
@@ -78,6 +102,14 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+            if (event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_RCTRL
+                    and len(orange_bullets) < MAX_BULLET):
+                bullet = pygame.Rect(
+                    player.right, player.centery - 2, 10, 5
+                )
+                orange_bullets.append(bullet)
+                BULLET_SOUND.play()
 
         # ------Add new stars based on the elapsed time-----
 
@@ -91,17 +123,12 @@ def main():
                 stars.append(star)
             star_add_increment = max( 200,star_add_increment - 50)   # Decrease the interval between star additions
             star_count = 0
-
-        # -----Handle events and player movement-----
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                break
+        
 
         # -----------------Handle player movement based on key presses-----------------------
-
         keys = pygame.key.get_pressed()
+        
+        
 
         #-----Move the player left -----
         if keys[pygame.K_LEFT] and player.x - PLAYER_VELOCITY >= 0:  
@@ -126,7 +153,7 @@ def main():
             player.y += PLAYER_VELOCITY        
         if keys[pygame.K_DOWN] and player.y + PLAYER_VELOCITY + player.height <= HEIGHT:
             player.y += PLAYER_VELOCITY
-
+        
 
         # -----Update star positions and check for collisions-----
 
@@ -139,7 +166,12 @@ def main():
                 stars.remove(star)                                     
                 Hit = True
                 break
-
+           
+        for bullet in orange_bullets[:]:
+            bullet.y -= BULLET_VELOCITY
+            if bullet.left < 0:
+                orange_bullets.remove(bullet)
+        
         # ----- Draw everything on the screen after collision-----
 
         # ----- Handle Game Over State -----
@@ -165,7 +197,7 @@ def main():
                             pygame.quit()
                             return
 
-        draw(player, elapsed_time, stars)
+        draw(player, elapsed_time, stars,orange_bullets)
             
 if __name__ == "__main__":
     main()
