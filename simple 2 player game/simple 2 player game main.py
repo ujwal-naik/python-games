@@ -1,3 +1,4 @@
+
 import pygame
 import os
 import time
@@ -37,7 +38,7 @@ BLACK_SPACESHIP_IMAGE= pygame.image.load(os.path.join("Assets", "black_spaceship
 BLACK_SPACESHIP = pygame.transform.rotate(BLACK_SPACESHIP_IMAGE, 270)  # Rotate the black spaceship by 90 degrees
 BLACK_SPACESHIP_SIZE = pygame.transform.scale(BLACK_SPACESHIP, (SPACSHIP_WIDTH, SPACESHIP_HEIGHT))  # Scale the black spaceship to the desired size
 
-ORANGE_SPACESHIP_IMAGE = pygame.image.load(os.path.join("Assets", "orange_spaceship.png"))
+ORANGE_SPACESHIP_IMAGE = pygame.image.load(os.path.join("Assets", "orange_spaceship.PNG"))
 ORANGE_SPACESHIP = pygame.transform.rotate(ORANGE_SPACESHIP_IMAGE, 90)  # Rotate the orange spaceship by 270 degrees
 ORANGE_SPACESHIP_SIZE = pygame.transform.scale(ORANGE_SPACESHIP, (SPACSHIP_WIDTH, SPACESHIP_HEIGHT))  # Scale the orange spaceship to the desired size
 
