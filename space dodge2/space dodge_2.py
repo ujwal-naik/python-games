@@ -77,7 +77,7 @@ def main():
     player = pygame.Rect(600, 300, SPACSHIP_WIDTH, SPACESHIP_HEIGHT)
 
     orange_bullets = []
-
+    
     # ------------time properties---------------------
     clock = pygame.time.Clock()
     start_time = time.time()
@@ -90,7 +90,7 @@ def main():
 
     stars = []
     Hit = False
-
+    
     keys = pygame.key.get_pressed()
 
     while not run:
@@ -106,11 +106,11 @@ def main():
                     and event.key == pygame.K_RCTRL
                     and len(orange_bullets) < MAX_BULLET):
                 bullet = pygame.Rect(
-                    player.right, player.centery - 2, 10, 5
+                    player.left , player.centery - 10, SPACSHIP_WIDTH//2, 10
                 )
                 orange_bullets.append(bullet)
                 BULLET_SOUND.play()
-
+        
         # ------Add new stars based on the elapsed time-----
 
         if star_count > star_add_increment:
@@ -161,11 +161,16 @@ def main():
             star.y += STAR_VELOCITY
             if star.y > HEIGHT:
                 stars.remove(star)                           # Remove stars that have moved off the bottom of the screen
-
+            
             elif star.y + star.height >= player.y and star.colliderect(player):   # Check for collision with the player
                 stars.remove(star)                                     
                 Hit = True
                 break
+            for bullet in orange_bullets: 
+                if star.colliderect(bullet):                  # Check for collision with bullets
+                    stars.remove(star)
+                    orange_bullets.remove(bullet)
+                    BULLET_HIT_SOUND.play()
            
         for bullet in orange_bullets[:]:
             bullet.y -= BULLET_VELOCITY
